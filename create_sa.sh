@@ -1,7 +1,7 @@
 #!/bin/bash
 
-AZURE_SA_NAME="testsa23402"
-AZURE_RG_NAME="rg-testsa"
+AZURE_SA_NAME="satest1417"
+AZURE_RG_NAME="rg-test"
 location="eastus"
 
 az group show \
@@ -31,7 +31,7 @@ if [[ $? -ne 0 ]]; then
 	--sku Standard_LRS \
 	--location $location \
 	--default-action Deny \
-	--allow-blob-public-access false
+	--allow-blob-public-access true
 else
     printf "Skipping storage creation. %s storage account already exists...\n" $AZURE_SA_NAME
 fi

@@ -58,22 +58,38 @@ AZURE_SA_CONN_STR=`az storage account show-connection-string \
 		    --query connectionString \
 		    2> /dev/null`
 if [[ $? -ne 0 ]]; then
-    printf "Could export the %s Storage Account Connection String...\n" $AZURE_SA_NAME
+    printf "Couldn't export the %s Storage Account Connection String...\n" $AZURE_SA_NAME
 fi
 
 # Save Storage Account Share Key
 AZURE_SA_KEY=`az storage account keys list \
-	    --account-name $AZURE_SA_NAME \
-	    --resource-group $AZURE_RG_NAME \
-	    --query "[?keyName=='key1'].value" --output tsv \
-	    2> /dev/null`
+		--account-name $AZURE_SA_NAME \
+		--resource-group $AZURE_RG_NAME \
+		--query "[?keyName=='key1'].value" --output tsv \
+		2> /dev/null`
 
 if [[ $? -ne 0 ]]; then
-    printf "Could export the %s Storage Account Key...\n" $AZURE_SA_NAME
+    printf "Couldn't export the %s Storage Account Key...\n" $AZURE_SA_NAME
 fi
+
+# Create a Shared Access Signature with a valid time of 30 minutes
+expiry_date=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+AZURE_SA_SAS=`az storage account generate-sas \
+		--permissions lrwd \
+		--account-name $AZURE_SA_NAME \
+		--services bf \
+		--resource-types co \
+		--expiry $expiry_date \
+		--account-key $AZURE_SA_KEY \
+		--output tsv`
+
+if [[ $? -ne 0 ]]; then
+     printf "Couldn't create the Shared Access Signature for the %s Storage Account", $AZURE_SA_NAME
+fi
+
 
 export AZURE_SA_CONN_STR
 export AZURE_SA_KEY
 export AZURE_SA_NAME
 export AZURE_RG_NAME
-
+export AZURE_SA_SAS
